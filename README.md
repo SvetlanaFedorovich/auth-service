@@ -1,1 +1,1 @@
-# auth-servise
+# auth-service
