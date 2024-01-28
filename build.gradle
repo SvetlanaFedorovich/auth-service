@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.0'
+    id 'io.spring.dependency-management' version '1.1.4'
+//    id 'checkstyle'
+}
+//checkstyle {
+//    toolVersion '7.8.1'
+//    configFile file("checkstyle.xml")
+//}
+ext {
+    lombokVersion = '1.18.30'
+    keycloak = '23.0.4'
+    liquibase = '4.25.0'
+    openfeign = '4.1.0'
+}
+
+group = 'mvp.project'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    implementation ("org.springframework.cloud:spring-cloud-starter-openfeign:${openfeign}",
+                   "org.springframework.boot:spring-boot-starter-data-redis",
+                   "org.springframework.boot:spring-boot-starter-validation",
+                   "org.springframework.boot:spring-boot-starter-web",
+                   "org.liquibase:liquibase-core:${liquibase}",
+                   "org.keycloak:keycloak-spring-boot-starter:${keycloak}")
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    runtimeOnly 'org.postgresql:postgresql'
+}
+
