@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 
+import static mvp.project.authservice.builder.MessageResponseBuilder.messageResponseBuild;
 import static mvp.project.authservice.constant.ErrorClientResponseMessage.AUTHORIZATION_ERROR;
 import static mvp.project.authservice.constant.ErrorClientResponseMessage.BD_SERVER_CONNECTION_ERROR;
 import static mvp.project.authservice.constant.ErrorClientResponseMessage.CHECK_THE_CORRECTNESS_OF_THE_ENTERED_DATA;
@@ -29,37 +30,21 @@ public class ApiErrorHandler {
         if (e.status() == HttpStatus.NOT_FOUND.value()) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
-                    .body(MessageResponse.builder()
-                            .code(String.valueOf(e.status()))
-                            .message(REALM_DOES_NOT_EXIST)
-                            .description(CHECK_THE_CORRECTNESS_OF_THE_ENTERED_DATA)
-                            .build());
+                    .body(messageResponseBuild(String.valueOf(e.status()),REALM_DOES_NOT_EXIST,CHECK_THE_CORRECTNESS_OF_THE_ENTERED_DATA));
         }
         if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(MessageResponse.builder()
-                            .code(String.valueOf(e.status()))
-                            .message(AUTHORIZATION_ERROR)
-                            .description(INCORRECT_USERNAME_OR_PASSWORD)
-                            .build());
+                    .body(messageResponseBuild(String.valueOf(e.status()), AUTHORIZATION_ERROR, INCORRECT_USERNAME_OR_PASSWORD));
         }
         if (e.status() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(MessageResponse.builder()
-                            .code(String.valueOf(e.status()))
-                            .message(BD_SERVER_CONNECTION_ERROR)
-                            .description(CHECK_YOUR_INTERNET_CONNECTION_OR_SERVER)
-                            .build());
+                    .body(messageResponseBuild(String.valueOf(e.status()),BD_SERVER_CONNECTION_ERROR, CHECK_YOUR_INTERNET_CONNECTION_OR_SERVER));
         }
         return ResponseEntity
                 .status(HttpStatus.GATEWAY_TIMEOUT)
-                .body(MessageResponse.builder()
-                        .code(String.valueOf(e.status()))
-                        .message(SERVER_CONNECTION_ERROR)
-                        .description(CHECK_YOUR_INTERNET_CONNECTION_OR_SERVER)
-                        .build());
+                .body(messageResponseBuild(String.valueOf(e.status()),SERVER_CONNECTION_ERROR,CHECK_YOUR_INTERNET_CONNECTION_OR_SERVER));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -27,4 +27,5 @@ public class UserCredentialsDto {
     private String password;
     private String client_id;
     private String grant_type;
+    Iterable
 }
