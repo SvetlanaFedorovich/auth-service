@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "mvp.project.authservice";
+
+service KeycloakService {
+    rpc getToken (TokenRequest) returns (TokenResponse) {}
+}
+
+message TokenRequest {
+    string username = 1;
+    string password = 2;
+    string client_id = 3;
+    string grant_type = 4;
+}
+
+message TokenResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+    string token_type = 3;
+    string session_state = 4;
+    int32 expires_in = 5;
+}
