@@ -1,6 +1,7 @@
 package mvp.project.authservice.model.dto;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,12 +21,13 @@ public class UserCredentialsDto {
     @Pattern(regexp = "^[a-zA-Z0-9]+$",
             message = INCORRECT_FORMAT_OF_THE_ENTERED_DATA)
     @NotEmpty(message = FIELD_IS_REQUIRED)
+    @NotNull
     private String username;
     @Pattern(regexp = ".{8,}",
             message = INSUFFICIENT_PASSWORD_LENGTH)
     @NotEmpty(message = FIELD_IS_REQUIRED)
+    @NotNull
     private String password;
     private String client_id;
     private String grant_type;
-    Iterable
 }
