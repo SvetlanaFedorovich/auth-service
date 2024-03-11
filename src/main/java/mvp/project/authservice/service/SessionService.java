@@ -2,27 +2,26 @@ package mvp.project.authservice.service;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import mvp.project.authservice.client.KeycloakClient;
-import mvp.project.authservice.client.RedisClient;
+import mvp.project.authservice.client.KeycloakGrpcClient;
+import mvp.project.authservice.client.RedisGrpcClient;
 import mvp.project.authservice.model.dto.UserCredentialsDto;
-import mvp.project.authservice.model.response.TokenResponse;
+import mvp.project.authservice.model.response.KeycloakTokenResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Optional;
-
 import static mvp.project.authservice.builder.CookieBuilder.cookieBuild;
-import static mvp.project.authservice.builder.UserBuilder.userBuild;
+import static mvp.project.authservice.builder.RedisCookieRequestBuilder.redisCookieRequestBuild;
+import static mvp.project.authservice.builder.TokenRequestBuilder.tokenRequestBuild;
+import static mvp.project.authservice.builder.TokenResponseBuilder.tokenResponseBuild;
 
 
 @Service
 @RequiredArgsConstructor
 public class SessionService {
-    private final RedisClient redisClient;
-    private final KeycloakClient keycloakClient;
+
+    private final RedisGrpcClient redisClient;
+    private final KeycloakGrpcClient keycloakClient;
 
     @Value("${keycloak.resource}")
     private String clientId;
@@ -30,19 +29,21 @@ public class SessionService {
     @Value("${keycloak.grant-type}")
     private String grantType;
 
-    public void saveSession(String username, String sessionId) {
-        Map.Entry<String, String> cookie = new AbstractMap.SimpleEntry<>(username, sessionId);
-        redisClient.saveSessionId(cookie);
+    public String saveSession(String username, String sessionId) {
+        return redisClient.saveSessionID(redisCookieRequestBuild(username, sessionId));
     }
 
-    public Optional<TokenResponse> getToken(UserCredentialsDto userCredentials) {
-        return keycloakClient.getToken(userBuild(userCredentials, clientId, grantType));
+    public KeycloakTokenResponse getToken(UserCredentialsDto userCredentials, HttpServletResponse response) {
+        KeycloakTokenResponse sessionID = tokenResponseBuild(keycloakClient
+                .getToken(tokenRequestBuild(userCredentials, clientId, grantType)));
+                    saveSession(userCredentials.getUsername(), sessionID.session_state());
+                    setCookieInHeaderResponse(userCredentials, sessionID.session_state(), response);
+                    return sessionID;
     }
 
-    public void setCookieInHeaderResponse(UserCredentialsDto userCredentials, TokenResponse token, HttpServletResponse response) {
+    public void setCookieInHeaderResponse(UserCredentialsDto userCredentials, String sessionID, HttpServletResponse response) {
         var username = userCredentials.getUsername();
-        var sessionId = token.session_state();
         response.addHeader(HttpHeaders.SET_COOKIE,
-                cookieBuild(username, sessionId));
+                cookieBuild(username, sessionID));
     }
 }

@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import static mvp.project.authservice.builder.MessageResponseBuilder.messageResponseBuild;
+import static mvp.project.authservice.constant.ErrorClientResponseMessage.AUTHORIZATION_ERROR;
+import static mvp.project.authservice.constant.ErrorClientResponseMessage.NOT_SUCCESSFUL;
 import static mvp.project.authservice.constant.ErrorClientResponseMessage.SUCCESSFULLY;
 import static mvp.project.authservice.constant.ErrorClientResponseMessage.YOU_HAVE_SUCCESSFULLY_LOGGED_IN;
 
@@ -23,15 +25,13 @@ public class AuthController {
 
     private final SessionService sessionService;
 
-
     @PostMapping("/auth")
     public ResponseEntity<MessageResponse> login(@Validated @RequestBody UserCredentialsDto userCredentials,
                                                  HttpServletResponse response) {
-        sessionService.getToken(userCredentials).ifPresent(
-                tokenResponse -> {
-                    sessionService.setCookieInHeaderResponse(userCredentials, tokenResponse, response);
-                    sessionService.saveSession(userCredentials.getUsername(), tokenResponse.session_state());
-                });
-        return ResponseEntity.ok().body(messageResponseBuild(String.valueOf(HttpStatus.OK.value()), SUCCESSFULLY, YOU_HAVE_SUCCESSFULLY_LOGGED_IN));
+        return sessionService.getToken(userCredentials, response).session_state().isEmpty() ?
+                ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(messageResponseBuild(String.valueOf(HttpStatus.UNAUTHORIZED.value()), NOT_SUCCESSFUL, AUTHORIZATION_ERROR)):
+                ResponseEntity.ok()
+                        .body(messageResponseBuild(String.valueOf(HttpStatus.OK.value()), SUCCESSFULLY, YOU_HAVE_SUCCESSFULLY_LOGGED_IN));
     }
 }

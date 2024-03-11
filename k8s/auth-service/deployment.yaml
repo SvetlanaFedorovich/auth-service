@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service-deployment
+  labels:
+    app: auth-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-service
+  template:
+    metadata:
+      labels:
+        app: auth-service
+    spec:
+      containers:
+        - name: auth-service
+          image: auth-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8096
+          env:
+            - name: GRPC_CLIENT_KEYCLOAK_SERVICE_ADDRESS
+              value: static://minikube.mshome.net:31500
+
+
